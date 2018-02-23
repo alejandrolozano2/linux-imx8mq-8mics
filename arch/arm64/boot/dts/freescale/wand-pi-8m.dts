@@ -191,6 +191,12 @@
 			>;
 		};
 
+		pinctrl_enet_3v3: enet3v3grp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_GPIO1_IO00_GPIO1_IO0		0x19
+			>;
+		};
+
 		pinctrl_fec1: fec1grp {
 			fsl,pins = <
 				MX8MQ_IOMUXC_ENET_MDC_ENET1_MDC		0x3
@@ -411,8 +417,9 @@
 
 &fec1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_fec1>;
+	pinctrl-0 = <&pinctrl_fec1 &pinctrl_enet_3v3>;
 	phy-mode = "rgmii-id";
+	pinctrl-assert-gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
 	phy-handle = <&ethphy0>;
 	fsl,magic-packet;
 	status = "okay";
@@ -421,9 +428,9 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		ethphy0: ethernet-phy@0 {
+		ethphy0: ethernet-phy@1 {
 			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <0>;
+			reg = <1>;
 			at803x,led-act-blind-workaround;
 			at803x,eee-disabled;
 		};
