@@ -102,6 +102,13 @@
 		spdif-in;
 	};
 
+	extcon_usb_otg: extcon_usb_otg {
+		compatible = "linux,extcon-usb-gpio";
+		id-gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_otg_id>;
+	};
+
 	regulator-virtuals {
 		compatible = "simple-bus";
 
@@ -166,6 +173,17 @@
 			virtual-supply = "ldo7";
 		};
 	};
+	gpio-edm {
+		compatible = "gpio-edm";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_otg_vbus>;
+
+		gpio_otg_vbus_pwr {
+			label = "OTG_VBUS_PWR";
+			gpios = <&gpio3 14 GPIO_ACTIVE_LOW>;
+			dir   = "out";
+		};
+	};
 };
 
 &clk {
@@ -177,6 +195,16 @@
 	pinctrl-names = "default";
 
 	wand-pi-8m {
+		pinctrl_otg_vbus: otgvbusgrp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_NAND_DQS_GPIO3_IO14		0x19   /* USB OTG VBUS Enable */
+			>;
+		};
+		pinctrl_otg_id: otgidgrp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_GPIO1_IO10_GPIO1_IO10		0x41   /* USB OTG ID */
+			>;
+		};
 		pinctrl_csi1: csi1grp {
 			fsl,pins = <
 				MX8MQ_IOMUXC_GPIO1_IO06_GPIO1_IO6		0x19
@@ -606,23 +634,6 @@
 		};
 	};
 
-	typec_ptn5100: ptn5110@50 {
-		compatible = "usb,tcpci";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_typec>;
-		reg = <0x50>;
-		interrupt-parent = <&gpio3>;
-		interrupts = <3 8>;
-		ss-sel-gpios = <&gpio3 15 GPIO_ACTIVE_HIGH>;
-		src-pdos = <0x380190c8>;
-		snk-pdos = <0x380190c8 0x3802d0c8>;
-		max-snk-mv = <9000>;
-		max-snk-ma = <1000>;
-		op-snk-mw = <9000>;
-		port-type = "drp";
-		default-role = "sink";
-	};
-
 	ov5640_mipi: ov5640_mipi@3c {
 		compatible = "ovti,ov5640_mipi";
 		reg = <0x3c>;
@@ -763,9 +774,9 @@
 };
 
 &usb_dwc3_0 {
-	status = "okay";
-	extcon = <&typec_ptn5100>;
+	extcon = <&extcon_usb_otg>;
 	dr_mode = "otg";
+	status = "okay";
 };
 
 &usb3_phy1 {
