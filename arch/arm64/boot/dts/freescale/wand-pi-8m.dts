@@ -176,11 +176,23 @@
 	gpio-edm {
 		compatible = "gpio-edm";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_otg_vbus>;
+		pinctrl-0 = <&pinctrl_otg_vbus &pinctrl_wifi_ctrl>;
 
 		gpio_otg_vbus_pwr {
 			label = "OTG_VBUS_PWR";
 			gpios = <&gpio3 14 GPIO_ACTIVE_LOW>;
+			dir   = "out";
+		};
+
+		gpio_wifi_wl_reg_on {
+			label = "WL_REG_ON";
+			gpios = <&gpio3 0 GPIO_ACTIVE_LOW>;
+			dir   = "out";
+		};
+
+		gpio_wifi_pwr_en {
+			label = "WIFI_PWR_EN";
+			gpios = <&gpio3 15 GPIO_ACTIVE_LOW>;
 			dir   = "out";
 		};
 	};
@@ -289,7 +301,6 @@
 
 		pinctrl_typec: typecgrp {
 			fsl,pins = <
-				MX8MQ_IOMUXC_NAND_RE_B_GPIO3_IO15	0x16
 				MX8MQ_IOMUXC_NAND_CE2_B_GPIO3_IO3	0x17059
 			>;
 		};
@@ -430,7 +441,14 @@
 
 		pinctrl_pmic: pmicirq {
 			fsl,pins = <
-				MX8MQ_IOMUXC_GPIO1_IO03_GPIO1_IO3	0x41 /*0x17059*/
+				MX8MQ_IOMUXC_GPIO1_IO03_GPIO1_IO3	0x41
+			>;
+		};
+
+		pinctrl_wifi_ctrl: wifi_ctrlgrp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_NAND_ALE_GPIO3_IO0		0x19 /* WL_REG_ON */
+				MX8MQ_IOMUXC_NAND_RE_B_GPIO3_IO15	0x19 /* WIFI_PWR_EN */
 			>;
 		};
 	};
