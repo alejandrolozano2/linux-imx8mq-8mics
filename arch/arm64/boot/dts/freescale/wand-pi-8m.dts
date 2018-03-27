@@ -661,6 +661,7 @@
 };
 
 &vpu {
+	regulator-supply = <&buck4_reg>;
 	status = "okay";
 };
 
