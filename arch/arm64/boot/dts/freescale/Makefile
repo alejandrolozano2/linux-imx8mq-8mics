@@ -52,6 +52,7 @@ dtb-$(CONFIG_ARCH_FSL_IMX8MQ) += fsl-imx8mq-ddr3l-arm2.dtb \
 				 fsl-imx8mq-evk-ak4497.dtb \
 				 fsl-imx8mq-evk-audio-tdm.dtb \
 				 fsl-imx8mq-evk-drm.dtb \
+				 pico-8m.dtb \
 				 wand-pi-8m.dtb
 
 always		:= $(dtb-y)
