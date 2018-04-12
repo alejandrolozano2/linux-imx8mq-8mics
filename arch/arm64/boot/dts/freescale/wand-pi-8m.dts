@@ -32,6 +32,16 @@
 		compatible = "simple-bus";
 		#address-cells = <1>;
 		#size-cells = <0>;
+
+		reg_usb_otg_vbus: usb_otg_vbus {
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_otg_vbus>;
+			compatible = "regulator-fixed";
+			regulator-name = "usb_otg_vbus";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+			gpio = <&gpio3 14 GPIO_ACTIVE_LOW>;
+		};
 	};
 
 	sound-hdmi {
@@ -39,13 +49,6 @@
 		model = "imx-audio-hdmi";
 		audio-cpu = <&sai4>;
 		protocol = <1>;
-	};
-
-	extcon_usb_otg: extcon_usb_otg {
-		compatible = "linux,extcon-usb-gpio";
-		id-gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_otg_id>;
 	};
 
 	regulator-virtuals {
@@ -116,13 +119,7 @@
 	gpio-edm {
 		compatible = "gpio-edm";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_otg_vbus &pinctrl_wifi_ctrl>;
-
-		gpio_otg_vbus_pwr {
-			label = "OTG_VBUS_PWR";
-			gpios = <&gpio3 14 GPIO_ACTIVE_LOW>;
-			dir   = "out";
-		};
+		pinctrl-0 = <&pinctrl_wifi_ctrl>;
 
 		gpio_wifi_wl_reg_on {
 			label = "WL_REG_ON";
@@ -150,12 +147,6 @@
 		pinctrl_otg_vbus: otgvbusgrp {
 			fsl,pins = <
 				MX8MQ_IOMUXC_NAND_DQS_GPIO3_IO14		0x19   /* USB OTG VBUS Enable */
-			>;
-		};
-
-		pinctrl_otg_id: otgidgrp {
-			fsl,pins = <
-				MX8MQ_IOMUXC_GPIO1_IO10_GPIO1_IO10		0x41   /* USB OTG ID */
 			>;
 		};
 
@@ -340,6 +331,18 @@
 				MX8MQ_IOMUXC_NAND_RE_B_GPIO3_IO15	0x19 /* WIFI_PWR_EN */
 			>;
 		};
+
+		pinctrl_tusb320_irq: tusb320_irqgrp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_NAND_DATA00_GPIO3_IO6	0x41
+			>;
+		};
+
+		pinctrl_typec_ss_sel: typec_ss_selgrp {
+			fsl,pins = <
+				MX8MQ_IOMUXC_NAND_CLE_GPIO3_IO5		0x19
+			>;
+		};
 	};
 };
 
@@ -370,6 +373,18 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c1>;
 	status = "okay";
+
+	typec_tusb320:tusb320@47 {
+		compatible = "ti,tusb320";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_tusb320_irq &pinctrl_typec_ss_sel>;
+		reg = <0x47>;
+		vbus-supply = <&reg_usb_otg_vbus>;
+		ss-sel-gpios = <&gpio3 5 GPIO_ACTIVE_HIGH>;
+		tusb320,int-gpio = <&gpio3 6 GPIO_ACTIVE_LOW>;
+		tusb320,select-mode = <0>;
+		tusb320,dfp-power = <0>;
+	};
 
 	pmic: bd71837@4b {
 		reg = <0x4b>;
@@ -612,7 +627,7 @@
 };
 
 &usb_dwc3_0 {
-	extcon = <&extcon_usb_otg>;
+	extcon = <&typec_tusb320>;
 	dr_mode = "otg";
 	status = "okay";
 };
