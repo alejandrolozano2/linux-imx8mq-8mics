@@ -1,0 +1,173 @@
+/*
+ * Copyright 2017 NXP
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "wand-pi-8m.dts"
+
+/ {
+	/delete-node/ sound-hdmi;
+
+	aliases {
+		csi0 = &mipi_csi_1;
+		csi1 = &mipi_csi_2;
+		ethernet0 = &fec1;
+		serial0 = &uart1;
+		serial1 = &uart2;
+		serial2 = &uart3;
+		serial3 = &uart4;
+		mmc0 = &usdhc1;
+		mmc1 = &usdhc2;
+		gpio0 = &gpio1;
+		gpio1 = &gpio2;
+		gpio2 = &gpio3;
+		gpio3 = &gpio4;
+		gpio4 = &gpio5;
+		dsi_phy0 = &mipi_dsi_phy;
+		mipi_dsi0 = &mipi_dsi;
+		i2c0 = &i2c1;
+		i2c1 = &i2c2;
+		i2c2 = &i2c3;
+		i2c3 = &i2c4;
+    };
+
+
+        regulators {
+                reg_audio: regulator@2 {
+                        compatible = "regulator-fixed";
+                        reg = <2>;
+                        regulator-name = "cs4244_supply";
+                        regulator-min-microvolt = <3300000>;
+                        regulator-max-microvolt = <3300000>;
+                        regulator-always-on;
+                };
+        };
+
+	sound_record: codec {
+		compatible = "knowles,mp34dt01";
+		
+	};
+
+       sound@2 {
+                compatible = "nxp,imx-audio-mp34dt01", "nxp,imx-mp34dt01";
+                nxp,model = "MP34DT01";
+                cpu-dai = <&sai5>;
+                ssi-controller = <&sai5>;
+                nxp,audio-codec = <&sound_record>;
+                clocks = <&clk IMX8MQ_AUDIO_PLL1>;
+        };
+
+        sound-cs4244 {
+                compatible = "fsl,imx6-sabreauto-cs4244", "fsl,imx-audio-cs4244";
+                model = "imx-cs4244";
+                sai-controller = <&sai2>;
+                audio-codec = <&codec4244>;
+                audio-wigets =
+                        "Line Out Jack", "rox out jack",
+                        "Line In Jack", "rox in jack";
+                audio-routing =
+                        "Line Out Jack", "AOUT1L",
+                        "Line Out Jack", "AOUT1R",
+                        "Line Out Jack", "AOUT2L",
+                        "Line Out Jack", "AOUT2R",
+                        "Line Out Jack", "AOUT3L",
+                        "Line Out Jack", "AOUT3R",
+                        "Line Out Jack", "AOUT4L",
+                        "Line Out Jack", "AOUT4R",
+                        "Line In Jack", "AIN1L",
+                        "Line In Jack", "AIN1R",
+                        "Line In Jack", "AIN2L",
+                        "Line In Jack", "AIN2R",
+                        "Line In Jack", "AIN3L",
+                        "Line In Jack", "AIN3R",
+                        "Line In Jack", "AIN4L",
+                        "Line In Jack", "AIN4R";
+
+        };
+
+};
+
+&iomuxc {
+	pinctrl-names = "default";
+
+	wand-pi-8m {
+
+        pinctrl_sai2: sai2grp {
+            fsl,pins = <
+                MX8MQ_IOMUXC_SAI2_TXFS_SAI2_TX_SYNC 0xd6
+                MX8MQ_IOMUXC_SAI2_TXC_SAI2_TX_BCLK  0xd6
+                MX8MQ_IOMUXC_SAI2_MCLK_SAI2_MCLK    0xd6
+                MX8MQ_IOMUXC_SAI2_TXD0_SAI2_TX_DATA0    0xd6
+                MX8MQ_IOMUXC_GPIO1_IO08_GPIO1_IO8   0xd6
+				MX8MQ_IOMUXC_SAI1_TXFS_GPIO4_IO10   0xd6
+            >;
+        };
+
+        pinctrl_sai5: sai5grp {
+            fsl,pins = <
+                MX8MQ_IOMUXC_SAI5_RXFS_SAI5_RX_SYNC 0xd1
+                MX8MQ_IOMUXC_SAI5_RXC_SAI5_RX_BCLK  0xd1
+                MX8MQ_IOMUXC_SAI5_MCLK_SAI5_MCLK    0xd1
+                MX8MQ_IOMUXC_SAI5_RXD0_SAI5_RX_DATA0 0xd1
+            >;
+        };
+	};
+};
+
+&i2c2 {
+
+        expander1:gpio@20 {
+                compatible = "ti,tca9535";
+                gpio-controller;
+                #gpio-cells = <2>;
+                reg = <0x20>;
+        };
+        expander2:gpio@21 {
+                compatible = "ti,tca9535";
+                reg = <0x21>;
+                gpio-controller;
+                #gpio-cells = <2>;
+        };
+        codec4244: cs4244@10 {
+                compatible = "cirrus,cs4244";
+                reg = <0x10>;
+                clocks = <&codec_osc>;
+                clock-names = "mclk";
+                reset-gpios = <&expander1 4 GPIO_ACTIVE_LOW>;
+                VA-supply = <&reg_audio>;
+                VD-supply = <&reg_audio>;
+                VLS-supply = <&reg_audio>;
+	};
+
+};
+
+&sai2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sai2>;
+	assigned-clocks = <&clk IMX8MQ_CLK_SAI2_SRC>,
+			<&clk IMX8MQ_CLK_SAI2_DIV>;
+	assigned-clock-parents = <&clk IMX8MQ_AUDIO_PLL1_OUT>;
+	assigned-clock-rates = <0>, <49152000>;
+	status = "okay";
+};
+
+&sai5 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sai5>;
+	assigned-clocks = <&clk IMX8MQ_CLK_SAI5_SRC>,
+			<&clk IMX8MQ_CLK_SAI5_DIV>;
+	assigned-clock-parents = <&clk IMX8MQ_AUDIO_PLL1_OUT>;
+	assigned-clock-rates = <0>, <24576000>;
+    fsl,dataline = <0x1 0x1>;
+    fsl,shared-interrupt;
+	status = "okay";
+};
