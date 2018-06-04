@@ -125,6 +125,7 @@ config SND_SOC_ALL_CODECS
 	select SND_SOC_SGTL5000 if I2C
 	select SND_SOC_SPH0645
 	select SND_SOC_MP34DT01
+	select SND_SOC_CS4244_I2C if I2C
 	select SND_SOC_SI476X if MFD_SI476X_CORE
 	select SND_SOC_SIRF_AUDIO_CODEC
 	select SND_SOC_SN95031 if INTEL_SCU_IPC
@@ -461,6 +462,15 @@ config SND_SOC_CS4265
 config SND_SOC_CS4270
 	tristate "Cirrus Logic CS4270 CODEC"
 	depends on I2C
+
+config SND_SOC_CS4244
+       tristate
+
+config SND_SOC_CS4244_I2C
+       tristate "Cirrus Logic CS4244 CODEC (I2C)"
+       depends on I2C
+       select SND_SOC_CS4244
+       select REGMAP_I2C
 
 # Cirrus Logic CS4270 Codec VD = 3.3V Errata
 # Select if you are affected by the errata where the part will not function
