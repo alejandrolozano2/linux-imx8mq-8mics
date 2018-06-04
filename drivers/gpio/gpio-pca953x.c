@@ -19,6 +19,7 @@
 #include <linux/platform_data/pca953x.h>
 #include <linux/reset.h>
 #include <linux/slab.h>
+#include <linux/delay.h>
 #include <asm/unaligned.h>
 #include <linux/of_platform.h>
 #include <linux/acpi.h>
@@ -79,6 +80,7 @@ static const struct i2c_device_id pca953x_id[] = {
 	{ "tca6408", 8  | PCA953X_TYPE | PCA_INT, },
 	{ "tca6416", 16 | PCA953X_TYPE | PCA_INT, },
 	{ "tca6424", 24 | PCA953X_TYPE | PCA_INT, },
+	{ "tca9535", 16 | PCA953X_TYPE | PCA_INT, },
 	{ "tca9539", 16 | PCA953X_TYPE | PCA_INT, },
 	{ "xra1202", 8  | PCA953X_TYPE },
 	{ }
@@ -822,6 +824,10 @@ static int pca953x_probe(struct i2c_client *client,
 	 * we can't share this chip with another i2c master.
 	 */
 	pca953x_setup_gpio(chip, chip->driver_data & PCA_GPIO_MASK);
+        i2c_smbus_write_byte_data(chip->client,0x06, 0xef);
+        i2c_smbus_write_byte_data(chip->client,0x02, 0xee);
+        mdelay(20);
+        i2c_smbus_write_byte_data(chip->client,0x02, 0xfe);
 
 	if (chip->gpio_chip.ngpio <= 8) {
 		chip->write_regs = pca953x_write_regs_8;
