@@ -60,8 +60,8 @@
        sound@2 {
                 compatible = "nxp,imx-audio-mp34dt01", "nxp,imx-mp34dt01";
                 nxp,model = "MP34DT01";
-                cpu-dai = <&sai5>;
-                ssi-controller = <&sai5>;
+                cpu-dai = <&sai2>;
+                ssi-controller = <&sai2>;
                 nxp,audio-codec = <&sound_record>;
                 clocks = <&clk IMX8MQ_AUDIO_PLL1>;
         };
@@ -69,7 +69,7 @@
         sound-cs4244 {
                 compatible = "fsl,imx6-sabreauto-cs4244", "fsl,imx-audio-cs4244";
                 model = "imx-cs4244";
-                sai-controller = <&sai2>;
+                sai-controller = <&sai5>;
                 audio-codec = <&codec4244>;
                 audio-wigets =
                         "Line Out Jack", "rox out jack",
@@ -107,8 +107,9 @@
                 MX8MQ_IOMUXC_SAI2_TXC_SAI2_TX_BCLK  0xd6
                 MX8MQ_IOMUXC_SAI2_MCLK_SAI2_MCLK    0xd6
                 MX8MQ_IOMUXC_SAI2_TXD0_SAI2_TX_DATA0    0xd6
+		MX8MQ_IOMUXC_SAI2_RXD0_SAI2_RX_DATA0    0xd6
                 MX8MQ_IOMUXC_GPIO1_IO08_GPIO1_IO8   0xd6
-				MX8MQ_IOMUXC_SAI1_TXFS_GPIO4_IO10   0xd6
+		MX8MQ_IOMUXC_SAI1_TXFS_GPIO4_IO10   0xd6
             >;
         };
 
@@ -118,13 +119,30 @@
                 MX8MQ_IOMUXC_SAI5_RXC_SAI5_RX_BCLK  0xd1
                 MX8MQ_IOMUXC_SAI5_MCLK_SAI5_MCLK    0xd1
                 MX8MQ_IOMUXC_SAI5_RXD0_SAI5_RX_DATA0 0xd1
+		MX8MQ_IOMUXC_SAI5_RXD3_SAI5_TX_DATA0 0xd1
             >;
         };
+
+
+	pinctrl_i2c3: i2c3grp {
+	     fsl,pins = <
+		MX8MQ_IOMUXC_I2C3_SCL_I2C3_SCL			0x4000007f
+		MX8MQ_IOMUXC_I2C3_SDA_I2C3_SDA			0x4000007f
+			>;
+		};
+
+
 	};
 };
 
-&i2c2 {
+&i2c3 {
 
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c3>;
+	status = "okay";
+
+	
         expander1:gpio@20 {
                 compatible = "ti,tca9535";
                 gpio-controller;
