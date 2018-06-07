@@ -117,7 +117,7 @@
             fsl,pins = <
                 MX8MQ_IOMUXC_SAI5_RXFS_SAI5_RX_SYNC 0xd1
                 MX8MQ_IOMUXC_SAI5_RXC_SAI5_RX_BCLK  0xd1
-                MX8MQ_IOMUXC_SAI5_MCLK_SAI5_MCLK    0xd1
+                MX8MQ_IOMUXC_SAI3_MCLK_SAI5_MCLK    0xd1
                 MX8MQ_IOMUXC_SAI5_RXD0_SAI5_RX_DATA0 0xd1
 		MX8MQ_IOMUXC_SAI5_RXD3_SAI5_TX_DATA0 0xd1
             >;
@@ -187,5 +187,6 @@
 	assigned-clock-rates = <0>, <24576000>;
     fsl,dataline = <0x1 0x1>;
     fsl,shared-interrupt;
+    fsl,sai-synchronous-rx;
 	status = "okay";
 };

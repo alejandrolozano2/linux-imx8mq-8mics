@@ -197,7 +197,6 @@ static const struct cs4244_ratios cs4244_ratios[] = {
 static int cs4244_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 				  int clk_id, unsigned int freq, int dir)
 {
-	pr_info("Roxana cs4244_set_dai_sysclk\n");
 	struct snd_soc_codec *codec = codec_dai->codec;
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 
@@ -212,7 +211,9 @@ static int cs4244_set_dai_fmt(struct snd_soc_dai *codec_dai,
 	struct snd_soc_codec *codec = codec_dai->codec;
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 	u32 val;
-	pr_info("Roxana cs4244_set_dai_fmt \n");
+	
+	pr_info("cs4244_set_dai_fmt\n");
+
 	/* Set DAI format */
 	switch (format & SND_SOC_DAIFMT_FORMAT_MASK) {
 	case SND_SOC_DAIFMT_LEFT_J:
@@ -262,10 +263,10 @@ static int cs4244_hw_params(struct snd_pcm_substream *substream,
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
 	u32 rate = params_rate(params);
-	pr_info("Roxana cs4244_hw_params\n");
 
+	pr_info("cs4244_hw_params\n");
 	/*Hardcoded to x512*/
-	regmap_write(cs4244->regmap, CS4244_MCLK_SPD, 0x34 /* 0x30 */); 	
+//	regmap_write(cs4244->regmap, CS4244_MCLK_SPD, 0x34 /* 0x30 */); 	
 
 	return 0;
 }
@@ -277,9 +278,9 @@ static int cs4244_hw_free(struct snd_pcm_substream *substream,
 	struct snd_soc_codec *codec = rtd->codec;
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
-	pr_info("Roxana cs4244_hw_free \n");
 	cs4244->rate[substream->stream] = 0;
 
+	pr_info("cs4244_hw_free\n");
 
 	return 0;
 }
@@ -291,7 +292,8 @@ static int cs4244_trigger(struct snd_pcm_substream *substream, int cmd,
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 	int val1;
 
-	pr_info("Roxana cs4244_trigger\n");
+	pr_info("cs4244_trigger\n");
+
 	switch (cmd) {
 	case SNDRV_PCM_TRIGGER_START:
 	case SNDRV_PCM_TRIGGER_RESUME:
@@ -320,14 +322,17 @@ static int cs4244_trigger(struct snd_pcm_substream *substream, int cmd,
 static int cs4244_startup(struct snd_pcm_substream *substream,
 		struct snd_soc_dai *cpu_dai)
 {
-	pr_info("Roxana cs4244_startup\n");
+	pr_info("cs4244_trigger\n");
+
 	return 0;
 }
 static int cs4244_digital_mute(struct snd_soc_dai *dai, int mute)
 {
 	struct snd_soc_codec *codec = dai->codec;
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
-	pr_info("Roxana cs4244_digital_mute\n");
+
+	pr_info("cs4244_digital_mute\n");
+
 	if(mute)
 	{
 		snd_soc_write(codec, CS4244_DACCTL3, 0xbf);
@@ -369,7 +374,6 @@ static int cs4244_fill_defaults(struct regmap *regmap,  struct reg_default * reg
 {
 
         int i, ret, val, index;
-        pr_info("Roxana cs4244_fill_defaults \n");
         for (i = 0; i < ARRAY_SIZE(cs4244_reg); i++) {
 
                 index = reg_vals[i].reg;
@@ -383,7 +387,6 @@ static int cs4244_fill_defaults(struct regmap *regmap,  struct reg_default * reg
 
 static bool cs4244_volatile_register(struct device *dev, unsigned int reg)
 {
-	pr_info("Roxana cs4244_volatile_register");
 	switch(reg){
 	case CS4244_INT1:
 	case CS4244_INT2:
@@ -398,13 +401,9 @@ static int read_chipid(struct cs4244_priv *cs4244)
 	int ret, val, chipid;
 	int val1,val2,val3; 
 	ret = val = chipid = 0;
-	pr_info("Roxana read_chipid\n");
 	ret = regmap_read(cs4244->regmap, CS4244_CHIPID1, &val1);
-	pr_info("Roxana ret %d val1 %d\n", ret, val1);
 	ret |= regmap_read(cs4244->regmap, CS4244_CHIPID2, &val2);
-	pr_info("Roxana ret %d val2 %d\n", ret, val2);
 	ret |= regmap_read(cs4244->regmap, CS4244_CHIPID3, &val3);
-	pr_info("Roxana ret %d val3 %d\n", ret, val3);
 	if(ret < 0)
 		return ret;
 	
@@ -428,7 +427,6 @@ static int read_chipid(struct cs4244_priv *cs4244)
 
 static bool cs4244_writeable_register(struct device *dev, unsigned int reg)
 {
-	pr_info("Roxana cs4244_writeable_register\n");
 	switch (reg) {
 	case CS4244_CHIPID1:
 	case CS4244_CHIPID2:
@@ -464,7 +462,6 @@ EXPORT_SYMBOL_GPL(cs4244_regmap_config);
 
 static int cs4244_codec_probe(struct snd_soc_codec *codec)
 {
-	pr_info("Roxana cs4244_codec_probe\n");
 	return 0;
 }
 
@@ -502,7 +499,6 @@ static void regmap_handler(struct work_struct *work)
     int cmd = cs4244->work_regmap.data;
     unsigned int status = 0;
     int ret, loop = 5;
-    pr_info("Roxana regmap_handler\n");
 
 	switch(cmd)
 	{
@@ -515,28 +511,27 @@ static void regmap_handler(struct work_struct *work)
 	gpiod_set_value_cansleep(cs4244->gpio_nreset, 0);
 	
 	//Configure x512
-        regmap_write(cs4244->regmap, CS4244_MCLK_SPD, 0x34 /* 0x30 */);
+        regmap_write(cs4244->regmap, CS4244_MCLK_SPD, 0x30 /* 0x30 */);
 
 	/*Clear PDN DAC_Mute */
+
+	regmap_write(cs4244->regmap,CS4244_DACCTL4,0x1f);
 	regmap_write(cs4244->regmap,CS4244_DACCTL4,0x10);	
 	regmap_write(cs4244->regmap,CS4244_DACCTL3, 0xb0);
 	regmap_write(cs4244->regmap,CS4244_ADCCTL2, 0x00);
-	pr_err("\n loop");
-	while(loop)
+	//while(loop)
 	{
 	   ret = regmap_read(cs4244->regmap,0x21, &status);
 	   if (ret < 0)
 		pr_err("Failed to read status register: %d\n", ret);
 	   if (status && 0xf0)
 	   {
-	   	  pr_info("Roxana in if status din regmap_handler\n");
 	      regmap_write(cs4244->regmap,CS4244_DACCTL4,0x1f);
 	      regmap_write(cs4244->regmap,CS4244_DACCTL4,0x10);
 	      regmap_write(cs4244->regmap,CS4244_ADCCTL2,0x0f);
 	      regmap_write(cs4244->regmap,CS4244_ADCCTL2,0x00);
 	   }
 	   else{
-	   		pr_info("Roxana in else status din regmap_handler\n");
 	         break;
 	    }
 	   loop--;
@@ -546,10 +541,13 @@ static void regmap_handler(struct work_struct *work)
 	break;
 
 	default:
-		pr_info("Roxana in default case din regmap_handler\n");
-        regmap_update_bits(cs4244->regmap,CS4244_DACCTL4,0x0f, 0x1f);
-        /*PDN DAC*/
+
         regmap_update_bits(cs4244->regmap,CS4244_DACCTL3,0x0f, 0xbf);
+        regmap_update_bits(cs4244->regmap,CS4244_DACCTL4,0x0f, 0x1f);
+        regmap_update_bits(cs4244->regmap,CS4244_DACCTL4,0x0f, 0x10);
+        regmap_update_bits(cs4244->regmap,CS4244_DACCTL4,0x0f, 0x1f);
+
+        /*PDN DAC*/
         regmap_update_bits(cs4244->regmap,CS4244_ADCCTL2,0xff, 0xff);	
 
 	}
@@ -558,11 +556,9 @@ static void regmap_handler(struct work_struct *work)
 
 int cs4244_probe(struct device *dev, struct regmap *regmap)
 {
-	pr_info("Roxana cs4244_probe1\n");
 	const struct of_device_id *of_id = of_match_device(cs4244_of_match, dev);
 	struct cs4244_priv *cs4244;
 	int ret, val, i;
-	pr_info("Roxana cs4244_probe2\n");
 	cs4244 = devm_kzalloc(dev, sizeof(*cs4244), GFP_KERNEL);
 	if (cs4244 == NULL)
 		return -ENOMEM;
@@ -643,32 +639,24 @@ int cs4244_probe(struct device *dev, struct regmap *regmap)
 	/* Each adc supports stereo input */
 	cs4244_dai.capture.channels_max = cs4244->drvdata->num_adcs * 2;
 
-	pr_info("Roxana cs4244_probe2-3\n");
 	cs4244->gpio_nreset = devm_gpiod_get(dev, "reset",
 				GPIOD_OUT_LOW);
         if (IS_ERR(cs4244->gpio_nreset))
                return PTR_ERR(cs4244->gpio_nreset);
-    pr_info("Roxana cs4244_probe3\n");       
 	if(cs4244->gpio_nreset)
 	gpiod_set_value_cansleep(cs4244->gpio_nreset, 1);
 	mdelay(250);
 	gpiod_set_value_cansleep(cs4244->gpio_nreset, 0);
-	pr_info("Roxana cs4244_probe4\n");
 	cs4244->wq = create_workqueue("regmap worqueue");
-	pr_info("Roxana cs4244_probe5\n");	
 	INIT_WORK(&cs4244->work_regmap.work, regmap_handler);
-	pr_info("Roxana cs4244_probe6\n");
 	regcache_cache_bypass(cs4244->regmap, false);
-	pr_info("Roxana cs4244_probe7\n");
 	ret = snd_soc_register_codec(dev, &cs4244_driver, &cs4244_dai, 1);
 	if (ret) {
 		dev_err(dev, "failed to register codec:%d\n", ret);
 		goto err_enable;
 	}
-	pr_info("Roxana cs4244_probe8\n");
 
 	regcache_cache_only(cs4244->regmap, false);
-	pr_info("Roxana cs4244_probe9\n");
 err_enable:
 	regulator_bulk_disable(ARRAY_SIZE(cs4244->supplies),
 			       cs4244->supplies);
@@ -680,7 +668,6 @@ EXPORT_SYMBOL_GPL(cs4244_probe);
 #ifdef CONFIG_PM
 static int cs4244_runtime_resume(struct device *dev)
 {
-	pr_info("Roxana cs4244_runtime_resume\n");
 	struct cs4244_priv *cs4244 = dev_get_drvdata(dev);
 	int ret;
 
@@ -721,7 +708,6 @@ static int cs4244_runtime_suspend(struct device *dev)
 {
 	struct cs4244_priv *cs4244 = dev_get_drvdata(dev);
 
-	pr_info("Roxana cs4244_runtime_suspend\n");
 //	regcache_cache_only(cs4244->regmap, false);
 
 	regulator_bulk_disable(ARRAY_SIZE(cs4244->supplies),

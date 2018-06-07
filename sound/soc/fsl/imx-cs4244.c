@@ -57,7 +57,6 @@ static int imx_cs4244_surround_hw_params(struct snd_pcm_substream *substream,
 	int ret = 0;
 
 	if (priv->is_codec_master) {
-		pr_info("Roxana is codec master\n");
 		dai_format = SND_SOC_DAIFMT_DSP_A | SND_SOC_DAIFMT_NB_NF |
 			     SND_SOC_DAIFMT_CBM_CFM;
 		if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
@@ -79,15 +78,12 @@ static int imx_cs4244_surround_hw_params(struct snd_pcm_substream *substream,
 		}
 
 	} else {
-		pr_info("Roxana is NOT ccodec master\n");
 		dai_format = SND_SOC_DAIFMT_DSP_A | SND_SOC_DAIFMT_NB_NF |
 			     SND_SOC_DAIFMT_CBS_CFS;
 		if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK){
 			ret = snd_soc_dai_set_sysclk(cpu_dai, 0, 0, SND_SOC_CLOCK_OUT);
-			pr_info("Roxana set snd soc dai set syclk in if\n");
 		}
 		else{
-			pr_info("Roxana set snd soc dai set syclk in else\n");
 
 			ret = snd_soc_dai_set_sysclk(cpu_dai, 0, 0, SND_SOC_CLOCK_OUT);
 		}
@@ -130,7 +126,6 @@ static int imx_cs4244_surround_startup(struct snd_pcm_substream *substream)
 	struct device *dev = &priv->pdev->dev;
 	static u32 support_rates[SUPPORT_RATE_NUM];
 	int ret;
-	pr_info("Roxana imx_cs4244_surround_startup\n");
 	if (priv->mclk_freq == 24576000) {
 		support_rates[0] = 48000;
 		support_rates[1] = 96000;
@@ -141,11 +136,9 @@ static int imx_cs4244_surround_startup(struct snd_pcm_substream *substream)
 		ret = snd_pcm_hw_constraint_list(runtime, 0, SNDRV_PCM_HW_PARAM_RATE,
 							&constraint_rates);
 		if (ret){
-			pr_info("Roxana ret in  imx_cs4244_surround_startup from snd_pcm_hw_constraint_list  %d\n", ret);
 			return ret;
 		}
 	} else{
-		pr_info("Roxana warn ");
 		dev_warn(dev, "mclk may be not supported %d\n", priv->mclk_freq);
 	}	
 	return 0;
@@ -275,36 +268,26 @@ static int imx_cs4244_probe(struct platform_device *pdev)
 
 	priv->pdev = pdev;
 	priv->asrc_pdev = NULL;
-	pr_info("Roxana imx_cs4244_probe1\n");
 	sai_np = of_parse_phandle(pdev->dev.of_node, "sai-controller", 0);
-	pr_info("Roxana imx_cs4244_probe2\n");
 	codec_np = of_parse_phandle(pdev->dev.of_node, "audio-codec", 0);
-	pr_info("Roxana imx_cs4244_probe3 codec_np %p sai controller %p \n", &codec_np, &sai_np);
 	if (!sai_np || !codec_np) {
 		dev_err(&pdev->dev, "phandle missing or invalid\n");
 		ret = -EINVAL;
 		goto fail;
 	}
-	pr_info("Roxana imx_cs4244_probe4\n");
 	asrc_np = of_parse_phandle(pdev->dev.of_node, "asrc-controller", 0);
-	pr_info("Roxana imx_cs4244_probe5\n");
 	if(asrc_np) {
 		asrc_pdev = of_find_device_by_node(asrc_np);
 		priv->asrc_pdev = asrc_pdev;
 	}
-	pr_info("Roxana imx_cs4244_probe6\n");
 	sai_pdev = of_find_device_by_node(sai_np);
-	pr_info("Roxana imx_cs4244_probe7\n");
 	if (!sai_pdev) {
 		dev_err(&pdev->dev, "failed to find sai platform device\n");
 		ret = -EINVAL;
 		goto fail;
 	}
-	pr_info("Roxana imx_cs4244_probe8 data %p phandle %p kobj %p\n", codec_np->data, codec_np->phandle, codec_np->kobj);
 	
 	codec_dev = of_find_i2c_device_by_node(codec_np);
-	pr_info("Roxana codec dev %p codec_dev->dev.driver %p\n", codec_dev, codec_dev->dev.driver);
-	pr_info("Roxana imx_cs4244_probe9\n");
 	if (!codec_dev || !codec_dev->dev.driver) {
 		dev_err(&pdev->dev, "failed to find codec platform device\n");
 		ret = -EINVAL;

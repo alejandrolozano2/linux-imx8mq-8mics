@@ -50,7 +50,6 @@
 static int cs4244_i2c_probe(struct i2c_client *i2c,
 			     const struct i2c_device_id *id)
 {
-	pr_info("Roxana cs4244_i2c_probe\n");
 	u32 ret = cs4244_probe(&i2c->dev,
 			devm_regmap_init_i2c(i2c, &cs4244_regmap_config));
 	if (ret)
@@ -64,7 +63,6 @@ static int cs4244_i2c_probe(struct i2c_client *i2c,
 
 static int cs4244_i2c_remove(struct i2c_client *i2c)
 {
-	pr_info("Roxanacs4244_i2c_remove \n");
 	snd_soc_unregister_codec(&i2c->dev);
 	pm_runtime_disable(&i2c->dev);
 
