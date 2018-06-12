@@ -115,11 +115,11 @@
 
         pinctrl_sai5: sai5grp {
             fsl,pins = <
-                MX8MQ_IOMUXC_SAI5_RXFS_SAI5_RX_SYNC 0xd1
-                MX8MQ_IOMUXC_SAI5_RXC_SAI5_RX_BCLK  0xd1
-                MX8MQ_IOMUXC_SAI3_MCLK_SAI5_MCLK    0xd1
-                MX8MQ_IOMUXC_SAI5_RXD0_SAI5_RX_DATA0 0xd1
-		MX8MQ_IOMUXC_SAI5_RXD3_SAI5_TX_DATA0 0xd1
+                MX8MQ_IOMUXC_SAI5_RXFS_SAI5_RX_SYNC 0xd6
+                MX8MQ_IOMUXC_SAI5_RXC_SAI5_RX_BCLK  0xd6
+                MX8MQ_IOMUXC_SAI5_MCLK_SAI5_MCLK    0xd6
+                MX8MQ_IOMUXC_SAI5_RXD0_SAI5_RX_DATA0 0xd6
+		MX8MQ_IOMUXC_SAI5_RXD3_SAI5_TX_DATA0 0xd6
             >;
         };
 
@@ -158,7 +158,7 @@
         codec4244: cs4244@10 {
                 compatible = "cirrus,cs4244";
                 reg = <0x10>;
-                clocks = <&codec_osc>;
+                clocks = <&clk IMX8MQ_CLK_SAI5_ROOT>;
                 clock-names = "mclk";
                 reset-gpios = <&expander1 4 GPIO_ACTIVE_LOW>;
                 VA-supply = <&reg_audio>;
@@ -186,7 +186,6 @@
 	assigned-clock-parents = <&clk IMX8MQ_AUDIO_PLL1_OUT>;
 	assigned-clock-rates = <0>, <24576000>;
     fsl,dataline = <0x1 0x1>;
-    fsl,shared-interrupt;
     fsl,sai-synchronous-rx;
 	status = "okay";
 };

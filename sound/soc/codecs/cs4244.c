@@ -30,7 +30,9 @@ static const char *const cs4244_supply_names[CS4244_NUM_SUPPLIES] = {
 	"VD",
 };
 
-#define CS4244_FORMATS	(SNDRV_PCM_FMTBIT_S32_LE)
+
+#define CS4244_FORMATS  ( SNDRV_PCM_FMTBIT_S32_LE |  SNDRV_PCM_FMTBIT_S32 | SNDRV_PCM_FMTBIT_S24_LE) 
+
 static int cs4244_fill_defaults(struct regmap *regmap,  struct reg_default * reg_vals);
 
 
@@ -212,7 +214,6 @@ static int cs4244_set_dai_fmt(struct snd_soc_dai *codec_dai,
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 	u32 val;
 	
-	pr_info("cs4244_set_dai_fmt\n");
 
 	/* Set DAI format */
 	switch (format & SND_SOC_DAIFMT_FORMAT_MASK) {
@@ -264,9 +265,7 @@ static int cs4244_hw_params(struct snd_pcm_substream *substream,
 	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
 	u32 rate = params_rate(params);
 
-	pr_info("cs4244_hw_params\n");
 	/*Hardcoded to x512*/
-//	regmap_write(cs4244->regmap, CS4244_MCLK_SPD, 0x34 /* 0x30 */); 	
 
 	return 0;
 }
@@ -280,7 +279,6 @@ static int cs4244_hw_free(struct snd_pcm_substream *substream,
 	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
 	cs4244->rate[substream->stream] = 0;
 
-	pr_info("cs4244_hw_free\n");
 
 	return 0;
 }
@@ -292,7 +290,6 @@ static int cs4244_trigger(struct snd_pcm_substream *substream, int cmd,
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 	int val1;
 
-	pr_info("cs4244_trigger\n");
 
 	switch (cmd) {
 	case SNDRV_PCM_TRIGGER_START:
@@ -322,7 +319,6 @@ static int cs4244_trigger(struct snd_pcm_substream *substream, int cmd,
 static int cs4244_startup(struct snd_pcm_substream *substream,
 		struct snd_soc_dai *cpu_dai)
 {
-	pr_info("cs4244_trigger\n");
 
 	return 0;
 }
@@ -331,7 +327,6 @@ static int cs4244_digital_mute(struct snd_soc_dai *dai, int mute)
 	struct snd_soc_codec *codec = dai->codec;
 	struct cs4244_priv *cs4244 = snd_soc_codec_get_drvdata(codec);
 
-	pr_info("cs4244_digital_mute\n");
 
 	if(mute)
 	{
@@ -361,7 +356,7 @@ static struct snd_soc_dai_driver cs4244_dai = {
 	.capture = {
 		.stream_name = "Capture",
 		.channels_min = 1,
-		.channels_max = 4,
+		.channels_max = 8,
 		.rates = SNDRV_PCM_RATE_8000_96000,
 		.formats = CS4244_FORMATS,
 	},
@@ -478,13 +473,6 @@ static const struct snd_soc_codec_driver cs4244_driver = {
 		.num_dapm_routes = ARRAY_SIZE(cs4244_dapm_routes),
 	},
 };
-#if 0
-const struct cs4244_driver_data cs4244_data = {
-	.name = "cs4244",
-	.num_adcs = 0,
-};
-EXPORT_SYMBOL_GPL(cs4244_data);
-#endif
 
 static const struct of_device_id cs4244_of_match[] = {
 	{ .compatible = "cirrus,cs4244", .data = &cs4244_data, },
@@ -518,8 +506,10 @@ static void regmap_handler(struct work_struct *work)
 	regmap_write(cs4244->regmap,CS4244_DACCTL4,0x1f);
 	regmap_write(cs4244->regmap,CS4244_DACCTL4,0x10);	
 	regmap_write(cs4244->regmap,CS4244_DACCTL3, 0xb0);
+	regmap_write(cs4244->regmap,CS4244_ADCCTL2, 0xf0);
 	regmap_write(cs4244->regmap,CS4244_ADCCTL2, 0x00);
-	//while(loop)
+
+#if 0
 	{
 	   ret = regmap_read(cs4244->regmap,0x21, &status);
 	   if (ret < 0)
@@ -536,6 +526,7 @@ static void regmap_handler(struct work_struct *work)
 	    }
 	   loop--;
 	}
+#endif
 	break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	break;
@@ -548,6 +539,7 @@ static void regmap_handler(struct work_struct *work)
         regmap_update_bits(cs4244->regmap,CS4244_DACCTL4,0x0f, 0x1f);
 
         /*PDN DAC*/
+        regmap_update_bits(cs4244->regmap,CS4244_ADCCTL2,0xff, 0xf0);	
         regmap_update_bits(cs4244->regmap,CS4244_ADCCTL2,0xff, 0xff);	
 
 	}
@@ -617,27 +609,9 @@ int cs4244_probe(struct device *dev, struct regmap *regmap)
 
 	/* Validate the chip ID */
 	ret = read_chipid(cs4244);
-#if 0
-	if (ret < 0) {
-		dev_err(dev, "failed to get device ID, ret = %d", ret);
-		goto err_enable;
-	}
-#endif
-	/* Get Revision ID */
-	ret = regmap_read(cs4244->regmap, CS4244_REVID, &val);
-#if 0 	
-	if (ret < 0) {
-		dev_err(dev, "failed to get Revision ID, ret = %d", ret);
-		goto err_enable;
-	}
-#endif
 	dev_info(dev, "found device, revision %X\n", val );
 
-
 	cs4244_dai.name = cs4244->drvdata->name;
-
-	/* Each adc supports stereo input */
-	cs4244_dai.capture.channels_max = cs4244->drvdata->num_adcs * 2;
 
 	cs4244->gpio_nreset = devm_gpiod_get(dev, "reset",
 				GPIOD_OUT_LOW);
@@ -684,8 +658,6 @@ static int cs4244_runtime_resume(struct device *dev)
 		goto err_clk;
 	}
 
-//	regcache_cache_only(cs4244->regmap, false);
-
 	ret = regcache_sync(cs4244->regmap);
 	if (ret) {
 		dev_err(dev, "failed to sync regmap: %d\n", ret);
@@ -707,8 +679,6 @@ err_clk:
 static int cs4244_runtime_suspend(struct device *dev)
 {
 	struct cs4244_priv *cs4244 = dev_get_drvdata(dev);
-
-//	regcache_cache_only(cs4244->regmap, false);
 
 	regulator_bulk_disable(ARRAY_SIZE(cs4244->supplies),
 			       cs4244->supplies);

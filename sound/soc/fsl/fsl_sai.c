@@ -730,7 +730,6 @@ static int fsl_sai_trigger(struct snd_pcm_substream *substream, int cmd,
 	u32 pins;
 	int i = 0, j = 0, k = 0;
 
-	pr_info("fsl_sai_trigger\n");
 
 	if (sai->slots)
 		slots = sai->slots;
@@ -849,7 +848,6 @@ static int fsl_sai_startup(struct snd_pcm_substream *substream,
 	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
 	int ret;
 
-	pr_info("fsl_sai_startup\n");
 
 	if (sai->is_stream_opened[tx])
 		return -EBUSY;
@@ -875,7 +873,6 @@ static void fsl_sai_shutdown(struct snd_pcm_substream *substream,
 	struct fsl_sai *sai = snd_soc_dai_get_drvdata(cpu_dai);
 	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
 
-	pr_info("fsl_sai_shutdown\n"); 
 
 	if (sai->is_stream_opened[tx])
 		sai->is_stream_opened[tx] = false;
